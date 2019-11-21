@@ -36,7 +36,7 @@ const borderColors = {
     orange: "#b32400",  // dark orange
     purple: "#ff00ff",  // hot pink
     green: "#ffff00",   // yellow
-    pink: "#ff00ff"   // hot pink
+    pink: "#9900cc"   // purple
 };
 
 const textColors = {
@@ -95,21 +95,43 @@ inquirer
             const name = responseOwner.data.name;
             const githubProfileUrl = responseOwner.data.html_url;
             const profileImageUrl = responseOwner.data.avatar_url;
-            const location = responseOwner.data.location;
+            let location = responseOwner.data.location;
             let bio = responseOwner.data.bio;
-            const blogUrl = responseOwner.data.blog;
+            let blogUrl = responseOwner.data.blog;
             const numRepos = responseOwner.data.public_repos;
             const followers = responseOwner.data.followers;
             const numFollowing = responseOwner.data.following;
             let company = responseOwner.data.company;
-            if (bio === null) {
+
+            // default text if no bio
+            if ((bio === null) || (bio == "")) {
                 bio = "No bio entered."
             };
-            if (company === null) {
+
+            // default text if no company
+            if ((company === null) || (company == "")) {
                 company = "No company listed."
             }
             else {
                 company = `Currently @ ${company}.`
+            };
+
+            // build url for google.maps
+            let locationExists;
+            if ((location === null) || (location == "")) {
+                location = "No location listed.";
+                locationExists = false;
+            }
+            else {
+                locationExists = true;
+                console.log(`location:  ${location}`);
+            };
+
+            // check for blog
+            let blogExists = true;
+            if ((blogUrl === null) || (blogUrl == "")) {
+                blogUrl = "No blog found.";
+                blogExists = false;
             };
 
 
@@ -217,7 +239,7 @@ inquirer
                     .fill(backgroundColor);
 
                 doc.save()
-                    .rect(0, 557, 611, 204)
+                    .rect(0, 557, 611, 234)
                     .fill(backgroundColor);
 
                 // draw primary rectangle in preferred color
@@ -250,7 +272,7 @@ inquirer
                     .stroke(borderColor);
 
 
-                    // add "Hi!"
+                // add "Hi!"
                 doc.moveDown(4);
                 doc.save()
                     .font("Helvetica-Bold", textColor, 25)
@@ -273,26 +295,73 @@ inquirer
                         align: "center"
                     });
 
-                    // space for links to google maps, github profile & blog
+                // link to location, if it exists
                 doc.moveDown();
+                if (locationExists) {
+                    console.log(`Location:  ${location}`);
+                    doc.save()
+                        .fontSize(8)
+                        .link(215, 205, 40, 8, `https://www.google.com/maps/place/${location.replace(/ /g, '+')}`)
+                        .text(location, 215, 205, {
+                            width: 181,
+                            align: "left",
+                            continue: true
+                        });
+                }
+                else {
+                    doc.save()
+                        .fontSize(8)
+                        .text(location, 215, 205, {
+                            align: "left",
+                            width: 181,
+                            continue: true
+                        });
+                };
+
+                // link to github profile
                 doc.save()
-                    .fontSize(8)
-                    .text("location   GitHub   Blog", {
-                        align: "center"
+                    .link(285, 205, 40, 8, githubProfileUrl)
+                    .text("GitHub", 215, 205, {
+                        align: "center",
+                        width: 181,
+                        link: githubProfileUrl,
+                        continue: true
                     });
 
-                    // bio
+                // link to blog
+                if (blogExists) {
+                    doc.save()
+                        .link(356, 205, 40, 8)
+                        .text("Blog", 215, 205, {
+                            align: "right",
+                            width: 181,
+                            link: blogUrl
+                        });
+                }
+                else {
+                    doc.save()
+                        .text(blogUrl, 215, 205, {
+                            align: "right",
+                            width: 181
+                        });
+
+                };
+
+
+                // bio
                 doc.moveDown(2);
                 doc.save()
                     .fontSize(15)
                     .fillAndStroke("black")
-                    .text(bio, {
-                        align: "center"
+                    .text(bio, 35, 240, {
+                        align: "center",
+                        height: 180,
+                        width: 541,
                     });
 
-                    // text for repositories & followers
-                    doc.moveDown();
-                    doc.save()
+                // text for repositories & followers
+                doc.moveDown();
+                doc.save()
                     .fontSize(15)
                     .fillAndStroke(textColor)
                     .text("Public Repositories", 35, 340, {
@@ -300,32 +369,32 @@ inquirer
                         height: 15,
                         align: "center"
                     });
-                    
-                    doc.save()
+
+                doc.save()
                     .text("Followers", 315, 340, {
                         width: 260,
                         height: 15,
                         align: "center"
                     });
-                    
-                    // data for repositories & followers
-                    doc.save()
+
+                // data for repositories & followers
+                doc.save()
                     .text(numRepos, 35, 365, {
                         width: 260,
                         height: 10,
                         align: "center"
                     });
 
-                    doc.save()
+                doc.save()
                     .text(followers, 315, 365, {
                         width: 260,
                         height: 10,
                         align: "center"
                     });
-                    
-                    // text for stars & following
-                    doc.moveDown();
-                    doc.save()
+
+                // text for stars & following
+                doc.moveDown();
+                doc.save()
                     .fontSize(15)
                     .fillAndStroke(textColor)
                     .text("GitHub Stars", 35, 430, {
@@ -333,23 +402,23 @@ inquirer
                         height: 15,
                         align: "center"
                     });
-                    
-                    doc.save()
+
+                doc.save()
                     .text("Following", 315, 430, {
                         width: 260,
                         height: 15,
                         align: "center"
                     });
-                    
-                    // data for stars & following
-                    doc.save()
+
+                // data for stars & following
+                doc.save()
                     .text(count, 35, 455, {
                         width: 260,
                         height: 10,
                         align: "center"
                     });
 
-                    doc.save()
+                doc.save()
                     .text(numFollowing, 315, 455, {
                         width: 260,
                         height: 10,
