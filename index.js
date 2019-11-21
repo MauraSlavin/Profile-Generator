@@ -29,6 +29,25 @@ const colors = {
     pink: "#ff00ff"
 };
 
+const borderColors = {
+    blue: "#000080",  // dark blue
+    red: "#660000",   // dark red
+    yellow: "#b32400",  // dark orange
+    orange: "#b32400",  // dark orange
+    purple: "#ff00ff",  // hot pink
+    green: "#ffff00",   // yellow
+    pink: "#ff00ff"   // hot pink
+};
+
+const textColors = {
+    blue: "#ffffff",     // white
+    red: "#ffffff",     // white
+    yellow: "#333333",  // dark grey
+    orange: "#333333",
+    purple: "#ffffff",
+    green: "#ffffff",
+    pink: "#333333"
+};
 
 // ask the user for the Github username and color
 inquirer
@@ -42,7 +61,7 @@ inquirer
             type: 'list',
             name: 'favColor',
             message: 'Click on your favorite color.',
-            choices: ['blue', 'green', 'red', 'purple', 'yellow', 'pink', 'orange'],
+            choices: ['blue', 'green', 'pink', 'purple', 'red', 'orange', 'yellow'],
             filter: function (val) {
                 return val.toLowerCase();
             }
@@ -53,7 +72,10 @@ inquirer
         const { username, favColor } = promptResponses;
         const backgroundColor = complimentaryColors[favColor];
         const mainColor = colors[favColor];
+        const borderColor = borderColors[favColor];
+        const textColor = textColors[favColor];
         console.log("color: " + mainColor + ". Comp color:  " + backgroundColor);
+        console.log("border: " + borderColor + ". Text color:  " + textColor);
 
         //        var x = {'test': 'hi'};
         // alert(x.test); // // alerts hi
@@ -70,6 +92,7 @@ inquirer
             //   console.log("responseOwner(.data)");
             // console.log(responseOwner.data);
 
+            const name = responseOwner.data.name;
             const githubProfileUrl = responseOwner.data.html_url;
             const profileImageUrl = responseOwner.data.avatar_url;
             const location = responseOwner.data.location;
@@ -78,9 +101,16 @@ inquirer
             const numRepos = responseOwner.data.public_repos;
             const followers = responseOwner.data.followers;
             const numFollowing = responseOwner.data.following;
+            let company = responseOwner.data.company;
+            if (company === null) {
+                company = "No company listed."
+            }
+            else {
+                company = `Currently @ ${company}.`
+            };
 
 
-
+            console.log("Name:  " + name);
             console.log("Profile:  " + githubProfileUrl);
             console.log("Image:  " + profileImageUrl);
             console.log("location:  " + location);
@@ -177,31 +207,64 @@ inquirer
                 // See below for browser usage
                 doc.pipe(fs.createWriteStream('profile.pdf'));
                 // doc.lineWidth(25);
-                // draw the background rectangles
+
+                // draw the background rectangles in complimentary color
                 doc.save()
-                    .rect(0, 0, 610, 261)
+                    .rect(0, 0, 611, 254)
                     .fill(backgroundColor);
 
                 doc.save()
-                    .rect(0, 539, 610, 261)
+                    .rect(0, 507, 611, 254)
                     .fill(backgroundColor);
 
+                // draw primary rectangle in preferred color
                 doc.save()
-                    .roundedRect(15, 45, 580, 255, 45)
+                    .roundedRect(15, 45, 581, 225, 45)
                     .fill(mainColor);
 
-               // doc.save()
-                 //   .circle(305, 75, 55)
-                   // .lineWidth(5);
-                //  .fillOpacity(0.6)
-                // .fill("./maura.jpg");
+                // add profile picture with complimentary border color
+                doc.image('maura.jpg', 255, 20, { fit: [100, 100] })
+                    .rect(255, 20, 100, 100)
+                    .lineWidth(3)
+                    .stroke(borderColor);
 
-                //         doc.image("maura.jpg", 250, 20, { width: 100 });
-                doc.image('maura.jpg', 250, 20, { fit: [100, 100] })
-                    .rect(250, 20, 100, 100)
-                    .lineWidth(5)
-                 
-                    .stroke('yellow');
+
+                doc.moveDown(4);
+                // add "Hi!"
+                doc.save()
+                    .font("Helvetica-Bold", textColor, 25)
+                    .fillAndStroke(textColor)
+                    .text("Hi!", {
+                        align: "center"
+                    });
+
+                // and introduction
+                doc.save()
+                    .fontSize(20)
+                    .text(`My name is ${name}!`, {
+                        align: "center"
+                    });
+
+                // where
+                doc.save()
+                    .fontSize(10)
+                    .text(company, {
+                        align: "center"
+                    });
+
+                doc.moveDown();
+
+
+
+
+
+
+                console.log("got here, too");
+                console.log("textColor:  " + textColor);
+                doc.moveDown();
+
+
+
 
 
 
@@ -216,6 +279,22 @@ inquirer
                 // Finalize PDF file
                 doc.end();
 
+                // open the PDF
+
+
+                //              doc.output( function(pdf) {
+                //                res.type('application/pdf');
+                //              res.end(pdf, 'binary');
+                //        });
+                //      app.get('profile.pdf', function (req, res) {
+                //        var doc = new Pdf();
+                //    doc.text("Hello World", 50, 50);
+
+                //      doc.output( function(pdf) {
+                //        res.type('application/pdf');
+                //      res.end(pdf, 'binary');
+                //});
+                //              });
             });
             //        console.log(`Saved ${repoNames.length} repos`);
         });
