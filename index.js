@@ -96,12 +96,15 @@ inquirer
             const githubProfileUrl = responseOwner.data.html_url;
             const profileImageUrl = responseOwner.data.avatar_url;
             const location = responseOwner.data.location;
-            const bio = responseOwner.data.bio;
+            let bio = responseOwner.data.bio;
             const blogUrl = responseOwner.data.blog;
             const numRepos = responseOwner.data.public_repos;
             const followers = responseOwner.data.followers;
             const numFollowing = responseOwner.data.following;
             let company = responseOwner.data.company;
+            if (bio === null) {
+                bio = "No bio entered."
+            };
             if (company === null) {
                 company = "No company listed."
             }
@@ -210,36 +213,35 @@ inquirer
 
                 // draw the background rectangles in complimentary color
                 doc.save()
-                    .rect(0, 0, 611, 254)
+                    .rect(0, 0, 611, 204)
                     .fill(backgroundColor);
 
                 doc.save()
-                    .rect(0, 507, 611, 254)
+                    .rect(0, 557, 611, 204)
                     .fill(backgroundColor);
 
                 // draw primary rectangle in preferred color
                 doc.save()
-                    .roundedRect(15, 45, 581, 225, 60)
+                    .roundedRect(15, 45, 581, 175, 60)
                     .fill(mainColor);
 
 
                 // draw boxes for stats
-                
                 doc.save()
-                .roundedRect(35, 320, 260, 70, 60)   // for repositories
-                .fill(mainColor);
+                    .roundedRect(35, 320, 260, 70, 60)   // for repositories
+                    .fill(mainColor);
 
                 doc.save()
-                .roundedRect(315, 320, 260, 70, 60)    // for followers
-                .fill(mainColor);
+                    .roundedRect(315, 320, 260, 70, 60)    // for followers
+                    .fill(mainColor);
 
                 doc.save()
-                .roundedRect(35, 410, 260, 70, 60)    //for stars
-                .fill(mainColor);
+                    .roundedRect(35, 410, 260, 70, 60)    //for stars
+                    .fill(mainColor);
 
                 doc.save()
-                .roundedRect(315, 410, 260, 70, 60)   // for following
-                .fill(mainColor);
+                    .roundedRect(315, 410, 260, 70, 60)   // for following
+                    .fill(mainColor);
 
                 // add profile picture with complimentary border color
                 doc.image('maura.jpg', 255, 20, { fit: [100, 100] })
@@ -248,8 +250,8 @@ inquirer
                     .stroke(borderColor);
 
 
+                    // add "Hi!"
                 doc.moveDown(4);
-                // add "Hi!"
                 doc.save()
                     .font("Helvetica-Bold", textColor, 25)
                     .fillAndStroke(textColor)
@@ -257,21 +259,102 @@ inquirer
                         align: "center"
                     });
 
-                // and introduction
+                // and introduction w/name
                 doc.save()
                     .fontSize(20)
                     .text(`My name is ${name}!`, {
                         align: "center"
                     });
 
-                // where
+                // company
                 doc.save()
                     .fontSize(10)
                     .text(company, {
                         align: "center"
                     });
 
+                    // space for links to google maps, github profile & blog
                 doc.moveDown();
+                doc.save()
+                    .fontSize(8)
+                    .text("location   GitHub   Blog", {
+                        align: "center"
+                    });
+
+                    // bio
+                doc.moveDown(2);
+                doc.save()
+                    .fontSize(15)
+                    .fillAndStroke("black")
+                    .text(bio, {
+                        align: "center"
+                    });
+
+                    // text for repositories & followers
+                    doc.moveDown();
+                    doc.save()
+                    .fontSize(15)
+                    .fillAndStroke(textColor)
+                    .text("Public Repositories", 35, 340, {
+                        width: 260,
+                        height: 15,
+                        align: "center"
+                    });
+                    
+                    doc.save()
+                    .text("Followers", 315, 340, {
+                        width: 260,
+                        height: 15,
+                        align: "center"
+                    });
+                    
+                    // data for repositories & followers
+                    doc.save()
+                    .text(numRepos, 35, 365, {
+                        width: 260,
+                        height: 10,
+                        align: "center"
+                    });
+
+                    doc.save()
+                    .text(followers, 315, 365, {
+                        width: 260,
+                        height: 10,
+                        align: "center"
+                    });
+                    
+                    // text for stars & following
+                    doc.moveDown();
+                    doc.save()
+                    .fontSize(15)
+                    .fillAndStroke(textColor)
+                    .text("GitHub Stars", 35, 430, {
+                        width: 260,
+                        height: 15,
+                        align: "center"
+                    });
+                    
+                    doc.save()
+                    .text("Following", 315, 430, {
+                        width: 260,
+                        height: 15,
+                        align: "center"
+                    });
+                    
+                    // data for stars & following
+                    doc.save()
+                    .text(count, 35, 455, {
+                        width: 260,
+                        height: 10,
+                        align: "center"
+                    });
+
+                    doc.save()
+                    .text(numFollowing, 315, 455, {
+                        width: 260,
+                        height: 10,
+                        align: "center"
+                    });
 
 
 
@@ -327,6 +410,5 @@ inquirer
         //  else {
         //    console.log("You forgot your password already?!");
         //  }
-
 
     });
