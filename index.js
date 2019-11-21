@@ -219,8 +219,27 @@ inquirer
 
                 // draw primary rectangle in preferred color
                 doc.save()
-                    .roundedRect(15, 45, 581, 225, 45)
+                    .roundedRect(15, 45, 581, 225, 60)
                     .fill(mainColor);
+
+
+                // draw boxes for stats
+                
+                doc.save()
+                .roundedRect(35, 320, 260, 70, 60)   // for repositories
+                .fill(mainColor);
+
+                doc.save()
+                .roundedRect(315, 320, 260, 70, 60)    // for followers
+                .fill(mainColor);
+
+                doc.save()
+                .roundedRect(35, 410, 260, 70, 60)    //for stars
+                .fill(mainColor);
+
+                doc.save()
+                .roundedRect(315, 410, 260, 70, 60)   // for following
+                .fill(mainColor);
 
                 // add profile picture with complimentary border color
                 doc.image('maura.jpg', 255, 20, { fit: [100, 100] })
@@ -259,9 +278,6 @@ inquirer
 
 
 
-                console.log("got here, too");
-                console.log("textColor:  " + textColor);
-                doc.moveDown();
 
 
 
