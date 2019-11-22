@@ -145,7 +145,20 @@ inquirer
             console.log("followers: " + followers);
             console.log("num following: " + numFollowing);
 
+            // Download actual profile image, save to file called profile.jpg.  
+            // It will be overwritten if it already exists
+            async function stream(profileImageUrl) {
+                console.log("stream started");
+                try {
+                    response = await request(profileImageUrl).pipe(fs.createWriteStream('profile.jpg'));
+                    console.log("request initialed");
+                } // end of try
+                catch (err) {
+                    console.log(err);
+                } // end of catch
 
+            };  // end of asynch block
+            stream(profileImageUrl);
 
             // query Github for user's repositories
             const queryUrlRepositories = `https://api.github.com/users/${username}/repos?per_page=100`;
@@ -165,64 +178,9 @@ inquirer
                 });
 
 
-                //               const getProfileImage = function () {
-                //                 request(profileImageUrl).pipe(fs.createWriteStream('profile.png'));
-                //           }
-                //         getProfileImage();
 
 
 
-                //              var stream = function(){
-                //                request(profileImageUrl).pipe(fs.createWriteStream('test1.png'));
-                //          }
-                //    stream();
-                console.log(profileImageUrl);
-
-                // save image file from url to put in PDF later
-                //           let fileStream = fs.createWriteStream('profile.png');
-                //         request(profileImageUrl).pipe(fileStream);
-
-
-                // try .... catch:  executes try. if error happens, executes catch.
-                async function getProfileImage(url) {
-                    try {
-                        let fileStream = fs.createWriteStream('profile.png');
-                        request(profileImageUrl).pipe(fileStream);  // end of const movie assignment / getMovie function
-
-
-                        console.log("Got here");
-
-                    }   // end of try block
-                    catch (err) {
-                        console.log(err);
-                    }  // end of catch block
-                }; // end of async block
-
-                getProfileImage(profileImageUrl);
-
-
-
-
-
-
-
-
-
-
-                //              request(profileImageUrl, function (err, res, profileImage) {
-
-                //               let userinfo = {
-                //                 name: username,
-                //               imageURL: profileImageUrl,
-                //             locationUrl: "https://www.google.maps",
-                //           githubProfileUrl: githubProfileUrl,
-                //         blogUrl: blogUrl,
-                //       bio: bio,
-                //     numRepos: numRepos,
-                //   followers: followers,
-                // numStars: repositoryStars,
-                //numFollowing: numFollowing
-                // }
 
                 // create the PDF file
 
@@ -265,8 +223,8 @@ inquirer
                     .roundedRect(315, 410, 260, 70, 60)   // for following
                     .fill(mainColor);
 
-                // add profile picture with complimentary border color
-                doc.image('maura.jpg', 255, 20, { fit: [100, 100] })
+                // add profile picture with complimentary border color (maura.jpg works)
+                doc.image('profile.jpg', 255, 20, { fit: [100, 100] })
                     .rect(255, 20, 100, 100)
                     .lineWidth(3)
                     .stroke(borderColor);
@@ -471,7 +429,7 @@ inquirer
         //  console.log(res.data[0]);
         //  console.log("First repo owner:");
         //  console.log(res.data[0].owner);
-        //    console.log(`Profile image URL:  ${profileImageURL}`);
+        //    console.log(`Profile image URL:  ${profileImageUrl}`);
         //       });
         //  if (response.confirm === response.password) {
         //    console.log("Success!");
