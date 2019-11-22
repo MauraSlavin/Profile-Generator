@@ -42,11 +42,41 @@ const borderColors = {
 const textColors = {
     blue: "#ffffff",     // white
     red: "#ffffff",     // white
-    yellow: "#333333",  // dark grey
-    orange: "#333333",
-    purple: "#ffffff",
-    green: "#ffffff",
-    pink: "#333333"
+    yellow: "#696463",  // dark grey
+    orange: "#696463",  // dark grey
+    purple: "#ffffff",     // white
+    green: "#ffffff",     // white
+    pink: "#696463"  // dark grey
+};
+
+const locationIconColors = {
+    blue: "locationIconWhite.png",     // white
+    red: "locationIconWhite.png",     // white
+    yellow: "locationIconGrey.png",  // dark grey
+    orange: "locationIconGrey",
+    purple: "locationIconWhite.png",
+    green: "locationIconWhite.png",
+    pink: "locationIconGrey"
+};
+
+const githubIconColors = {
+    blue: "githubIconWhite.png",     // white
+    red: "githubIconWhite.png",     // white
+    yellow: "githubIconGrey.png",  // dark grey
+    orange: "githubIconGrey",
+    purple: "githubIconWhite.png",
+    green: "githubIconWhite.png",
+    pink: "githubIconGrey"
+};
+
+const blogIconColors = {
+    blue: "blogIconWhite.png",     // white
+    red: "blogIconWhite.png",     // white
+    yellow: "blogIconGrey.png",  // dark grey
+    orange: "blogIconGrey",
+    purple: "blogIconWhite.png",
+    green: "blogIconWhite.png",
+    pink: "blogIconGrey"
 };
 
 // ask the user for the Github username and color
@@ -74,6 +104,9 @@ inquirer
         const mainColor = colors[favColor];
         const borderColor = borderColors[favColor];
         const textColor = textColors[favColor];
+        const locationIcon = locationIconColors[favColor];
+        const githubIcon = githubIconColors[favColor];
+        const blogIcon = blogIconColors[favColor];
         console.log("color: " + mainColor + ". Comp color:  " + backgroundColor);
         console.log("border: " + borderColor + ". Text color:  " + textColor);
 
@@ -257,7 +290,7 @@ inquirer
                 doc.moveDown();
                 if (locationExists) {
                     // location icon first
-                    doc.image('locationArrowIcon.png', 205, 205, { 
+                    doc.image(locationIcon, 205, 205, { 
                         fit: [8, 8],    // same as fonstSize
                         continue: true  // don't go to next line
                     });  // end of icon block
@@ -284,7 +317,7 @@ inquirer
 
                 // link to github profile with icon
                 // github icon first
-                doc.image('githubIconBlack.png', 290, 205, { 
+                doc.image(githubIcon, 290, 205, { 
                     fit: [8, 8],    // same as fontSize
                     continue: true  // don't go to next line yet
                 });  // end of icon block
@@ -300,7 +333,7 @@ inquirer
                 // link to blog
                 if (blogExists) {
                     // blog icon first
-                    doc.image('blogIconBlack.png', 376, 205, { 
+                    doc.image(blogIcon, 376, 205, { 
                         fit: [8, 8],    // same as fonstSize
                         //width: 8,
                         //align: "right",
@@ -328,7 +361,7 @@ inquirer
                 doc.moveDown(2);
                 doc.save()
                     .fontSize(15)
-                    .fillAndStroke("black")
+                    .fillAndStroke(textColor)
                     .text(bio, 35, 240, {
                         align: "center",
                         height: 180,

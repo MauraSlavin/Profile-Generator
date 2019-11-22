@@ -22,5 +22,8 @@
     "pdfkit": "^0.10.0",
     "request": "^2.88.0",
     "require": "^2.4.20"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.11.2"
   }
 }
