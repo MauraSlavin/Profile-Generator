@@ -253,46 +253,64 @@ inquirer
                         align: "center"
                     });
 
-                // link to location, if it exists
+                // link to location, if it exists w/ leading icon
                 doc.moveDown();
                 if (locationExists) {
-                    console.log(`Location:  ${location}`);
+                    // location icon first
+                    doc.image('locationArrowIcon.png', 205, 205, { 
+                        fit: [8, 8],    // same as fonstSize
+                        continue: true  // don't go to next line
+                    });  // end of icon block
+                    // then location text and link
                     doc.save()
                         .fontSize(8)
-                        .link(215, 205, 40, 8, `https://www.google.com/maps/place/${location.replace(/ /g, '+')}`)
+                        .link(205, 205, 40, 8, `https://www.google.com/maps/place/${location.replace(/ /g, '+')}`)
                         .text(location, 215, 205, {
-                            width: 181,
+                            width: 201,
                             align: "left",
                             continue: true
                         });
                 }
+                // no location found - print text saying so
                 else {
                     doc.save()
                         .fontSize(8)
                         .text(location, 215, 205, {
                             align: "left",
-                            width: 181,
+                            width: 201,
                             continue: true
                         });
                 };
 
-                // link to github profile
+                // link to github profile with icon
+                // github icon first
+                doc.image('githubIconBlack.png', 290, 205, { 
+                    fit: [8, 8],    // same as fontSize
+                    continue: true  // don't go to next line yet
+                });  // end of icon block
                 doc.save()
-                    .link(285, 205, 40, 8, githubProfileUrl)
-                    .text("GitHub", 215, 205, {
-                        align: "center",
-                        width: 181,
+                    .link(290, 205, 40, 8, githubProfileUrl)  // link starts where icon is & goes for 20
+                    .text("GitHub", 300, 205, {
+                        align: "left",
+                        width: 30,
                         link: githubProfileUrl,
-                        continue: true
-                    });
+                        continue: true    // don't go to next line yet
+                });
 
                 // link to blog
                 if (blogExists) {
+                    // blog icon first
+                    doc.image('blogIconBlack.png', 376, 205, { 
+                        fit: [8, 8],    // same as fonstSize
+                        //width: 8,
+                        //align: "right",
+                        continue: true  // don't go to next line yet
+                    });  // end of icon block
                     doc.save()
-                        .link(356, 205, 40, 8)
-                        .text("Blog", 215, 205, {
+                        .link(366, 205, 40, 8)
+                        .text("Blog", 366, 205, {
                             align: "right",
-                            width: 181,
+                            width: 40,
                             link: blogUrl
                         });
                 }
