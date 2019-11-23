@@ -9,27 +9,28 @@ const fs = require("fs");
 // to get image from github profile image url
 const request = require("request");
 // needed to get pdf to browser
-const blobStream = require("blob-stream");
 const open = require("open");
 
-const complimentaryColors = {
-  blue: "#ffff99", // pale yellow with blue
-  red: "#ffff99", // pale yellow with red
-  yellow: "#ff6600", // orange with yellow
-  orange: "#ffff00", // yellow with orange
-  purple: "#ffb3ff", // pink with purple
-  green: "#b3ffcc", // light green with green
-  pink: "#ffccff" // light pink with pink
-};
-
+// shades to use for primary background when colors are picked
 const colors = {
   blue: "#0066ff",
-  red: "#ff0000",
-  yellow: "#ffff00",
+  red: "#bf0404",
+  yellow: "#ffff99", // pale yellow
   orange: "#ff6600",
   purple: "#9900cc",
   green: "#009933",
   pink: "#ff00ff"
+};
+
+// complimentary colors to use for background
+const complimentaryColors = {
+  blue: "#accbfa", // light blue with blue
+  red: "#ff9191", // light red with red
+  yellow: "#ffff00", // bright yello with pale yellow
+  orange: "#ffae78", // light orange with orange
+  purple: "#ffb3ff", // pink with purple
+  green: "#b3ffcc", // light green with green
+  pink: "#ffccff" // light pink with pink
 };
 
 const borderColors = {
@@ -40,46 +41,6 @@ const borderColors = {
   purple: "#ff00ff", // hot pink
   green: "#ffff00", // yellow
   pink: "#9900cc" // purple
-};
-
-const textColors = {
-  blue: "#ffffff", // white
-  red: "#ffffff", // white
-  yellow: "#696463", // dark grey
-  orange: "#696463", // dark grey
-  purple: "#ffffff", // white
-  green: "#ffffff", // white
-  pink: "#696463" // dark grey
-};
-
-const locationIconColors = {
-  blue: "locationIconWhite.png", // white
-  red: "locationIconWhite.png", // white
-  yellow: "locationIconGrey.png", // dark grey
-  orange: "locationIconGrey",
-  purple: "locationIconWhite.png",
-  green: "locationIconWhite.png",
-  pink: "locationIconGrey"
-};
-
-const githubIconColors = {
-  blue: "githubIconWhite.png", // white
-  red: "githubIconWhite.png", // white
-  yellow: "githubIconGrey.png", // dark grey
-  orange: "githubIconGrey",
-  purple: "githubIconWhite.png",
-  green: "githubIconWhite.png",
-  pink: "githubIconGrey"
-};
-
-const blogIconColors = {
-  blue: "blogIconWhite.png", // white
-  red: "blogIconWhite.png", // white
-  yellow: "blogIconGrey.png", // dark grey
-  orange: "blogIconGrey",
-  purple: "blogIconWhite.png",
-  green: "blogIconWhite.png",
-  pink: "blogIconGrey"
 };
 
 // ask the user for the Github username and color
@@ -100,44 +61,56 @@ inquirer
         return val.toLowerCase();
       }
     }
-  ])
+  ]) // end of inquirer prompt
+
   .then(promptResponses => {
     // get username & color from response
     const { username, favColor } = promptResponses;
+
+    // set colors for PDF based on favorite color chosen: primary & secondary background colors, border, text and icon colors
     const backgroundColor = complimentaryColors[favColor];
     const mainColor = colors[favColor];
     const borderColor = borderColors[favColor];
-    const textColor = textColors[favColor];
-    const locationIcon = locationIconColors[favColor];
-    const githubIcon = githubIconColors[favColor];
-    const blogIcon = blogIconColors[favColor];
-    console.log("color: " + mainColor + ". Comp color:  " + backgroundColor);
-    console.log("border: " + borderColor + ". Text color:  " + textColor);
 
-    //        var x = {'test': 'hi'};
-    // alert(x.test); // // alerts hi
-    // alert(x['test']); // alerts hi
+    // set text and icon colors based on favColor
+    let textColor, locationIcon, githubIcon, blogIcon;
+
+    if (favColor === "yellow") {
+      // if the color is yellow, use dark grey font color so it can be seen
+      textColor = "#696463"; // dark grey
+      locationIcon = "locationIconGrey.png";
+      githubIcon = "githubIconGrey.png";
+      blogIcon = "blogIconGrey.png";
+    } else {
+      // white is good on any other color choice.
+      textColor = "#ffffff"; // white
+      locationIcon = "locationIconWhite.png";
+      githubIcon = "githubIconWhite.png";
+      blogIcon = "blogIconWhite.png";
+    }
 
     //  can now query Github...for user's profile information
-    // query Github for
     const queryUrlOwner = `https://api.github.com/users/${username}`;
 
     axios.get(queryUrlOwner).then(function(responseOwner) {
       //get information needed
       // profile profile link, profile image link, location, bio, blog link, # repositories
-      //   console.log("responseOwner(.data)");
-      // console.log(responseOwner.data);
+      const githubProfileUrl = responseOwner.data.html_url;
+      // check if github profile found
+      if (githubProfileUrl === null || githubProfileUrl == "") {
+        console.log(`No GitHub Profile for ${username} found.`);
+        return; // end program
+      }
 
       const name = responseOwner.data.name;
-      const githubProfileUrl = responseOwner.data.html_url;
-      const profileImageUrl = responseOwner.data.avatar_url;
-      let location = responseOwner.data.location;
-      let bio = responseOwner.data.bio;
-      let blogUrl = responseOwner.data.blog;
+      const profileImageUrl = responseOwner.data.avatar_url; // use image with error message if no profile image found.
+      const location = responseOwner.data.location; // use boolean to change text (easier with link processing)
+      let bio = responseOwner.data.bio; // may change if none found
+      const blogUrl = responseOwner.data.blog; // use boolean to change text (easier with link processing)
       const numRepos = responseOwner.data.public_repos;
       const followers = responseOwner.data.followers;
       const numFollowing = responseOwner.data.following;
-      let company = responseOwner.data.company;
+      let company = responseOwner.data.company; // may change if none found
 
       // default text if no bio
       if (bio === null || bio == "") {
@@ -148,68 +121,52 @@ inquirer
       if (company === null || company == "") {
         company = "No company listed.";
       } else {
-        company = `Currently @ ${company}.`;
+        company = `Currently at ${company}.`;
       }
 
       // build url for google.maps
       let locationExists;
       if (location === null || location == "") {
-        location = "No location listed.";
-        locationExists = false;
+        locationExists = false; // use this to determine whether to create a link or not
       } else {
-        locationExists = true;
-        console.log(`location:  ${location}`);
+        locationExists = true; // use this to determine whether to create a link or not
       }
 
       // check for blog
-      let blogExists = true;
+      let blogExists; // use this to determine whether to create a link or not
       if (blogUrl === null || blogUrl == "") {
-        blogUrl = "No blog found.";
-        blogExists = false;
+        blogExists = false; // use this to determine whether to create a link or not
+      } else {
+        blogExists = true;
       }
-
-      console.log("Name:  " + name);
-      console.log("Profile:  " + githubProfileUrl);
-      console.log("Image:  " + profileImageUrl);
-      console.log("location:  " + location);
-      console.log("bio: " + bio);
-      console.log("blog:  " + blogUrl);
-      console.log("# repos:  " + numRepos);
-      console.log("followers: " + followers);
-      console.log("num following: " + numFollowing);
 
       // Download actual profile image, save to file called profile.jpg.
       // It will be overwritten if it already exists
+      const imageJpg = "profile.jpg"; // copies profile image to this file if it exists
       async function streamProfileImage(profileImageUrl) {
-        console.log("stream started");
         try {
           response = await request(profileImageUrl).pipe(
             fs.createWriteStream("profile.jpg")
           );
-          console.log("request initialed");
-        } catch (err) {
           // end of try
-          console.log(err);
+        } catch (err) {
+          imageJpg = "noProfileImage.jpg"; // image with "No Profile Image Found" in it; used if profile image not found.
         } // end of catch
       } // end of asynch block
+
+      // call async function
       streamProfileImage(profileImageUrl);
 
-      // query Github for user's repositories
+      // query Github for user's repositories to get star counts
       const queryUrlRepositories = `https://api.github.com/users/${username}/repos?per_page=100`;
 
       axios.get(queryUrlRepositories).then(function(responseRepositories) {
-        // console.log(responseRepositories.data);   // ALL the results!!
-
-        // Get star counts
+        // Get star counts for each repository, and add them.
         count = 0;
         const repositoryStars = responseRepositories.data.map(function(
           repository
         ) {
-          //     console.log("responseRepositories.stargazers_count:" + repository.stargazers_count);  // this happens once for each repository
-          // console.log(repo.name);
           count += repository.stargazers_count;
-          //  console.log("count: " + count);
-          //   console.log(" ");
           return repository.stargazers_count;
         });
 
@@ -217,24 +174,23 @@ inquirer
 
         const doc = new PDFDocument();
 
-        // pipe the document to a blob to get to browser
-        //   const stream = doc.pipe(blobStream());
-        // doc.pipe(blobStream());
-        //let stream = doc.pipe(blobStream());
-        let writeStream = doc.pipe(fs.createWriteStream("profile.pdf"));
+        // pipe the document to username.pdf.  It will get overwritten if it already exists.
+        const usernamePDF = username + ".pdf";
+        let writeStream = doc.pipe(fs.createWriteStream(usernamePDF));
 
         // draw the background rectangles in complimentary color
-        doc
+        // pdf file is 611 x 761
+        doc // at the top
           .save()
           .rect(0, 0, 611, 204)
           .fill(backgroundColor);
 
-        doc
+        doc // at the bottom
           .save()
           .rect(0, 557, 611, 234)
           .fill(backgroundColor);
 
-        // draw primary rectangle in preferred color
+        // draw primary rectangle in preferred color; offset down a bit from the top background rectangle
         doc
           .save()
           .roundedRect(15, 45, 581, 175, 60)
@@ -261,9 +217,9 @@ inquirer
           .roundedRect(315, 410, 260, 70, 60) // for following
           .fill(mainColor);
 
-        // add profile picture with complimentary border color (maura.jpg works)
+        // add profile picture with complimentary border color
         doc
-          .image("profile.jpg", 255, 20, { fit: [100, 100] })
+          .image(imageJpg, 255, 20, { fit: [100, 100] })
           .rect(255, 20, 100, 100)
           .lineWidth(3)
           .stroke(borderColor);
@@ -291,6 +247,7 @@ inquirer
           .save()
           .fontSize(10)
           .text(company, {
+            // will state "No company" if none found.
             align: "center"
           });
 
@@ -324,7 +281,7 @@ inquirer
           doc
             .save()
             .fontSize(8)
-            .text(location, 215, 205, {
+            .text("No location listed.", 215, 205, {
               align: "left",
               width: 201,
               continue: true
@@ -365,7 +322,7 @@ inquirer
               link: blogUrl
             });
         } else {
-          doc.save().text(blogUrl, 215, 205, {
+          doc.save().text("No blog found.", 215, 205, {
             align: "right",
             width: 181
           });
@@ -376,7 +333,7 @@ inquirer
         doc
           .save()
           .fontSize(15)
-          .fillAndStroke(textColor)
+          .fillAndStroke("#696463") // bio color always dark grey - background is white here
           .text(bio, 35, 240, {
             align: "center",
             height: 180,
@@ -448,68 +405,18 @@ inquirer
         // Finalize PDF file
         doc.end();
 
-        // the following block of code from https://github.com/devongovett/blob-stream
-        // to open blobstream as a url
-        // .pipe(blobStream())
-        //       doc.on("finish", function() {
-        // get a blob
-        //const blob = this.toBlob();
-
-        // get a blob URL
-        //       const url = this.toBlobURL();
-        //     console.log(url);
-        //   window.open(url);
-
-        //        stream.on("finish", function() {
-        // get a blob you can do whatever you like with
-        // const blob = stream.toBlob('application/pdf');
-
-        // or get a blob URL for display in the browser
-        //      const url = stream.toBlobURL("profile.pdf");
-        //  iframe.src = url;
-        //    });
-        writeStream.on('finish', function() {
-          async function displayPDF() {
+        // open the PDF
+        writeStream.on("finish", function() {
+          //  wait until document is free to display
+          async function displayPDF(pdfFile) {
             // Opens the image in the default image viewer and waits for the opened app to quit.
-            console.log("The image viewer started");
-            await open("profile.pdf", { wait: true });
+            await open(pdfFile, { wait: true });
+            return;  // end program
+          }
 
-            // Opens the URL in the default browser.
-            //  await open('https://sindresorhus.com');
-
-            // Opens the URL in a specified browser.
-            //    await open('https://sindresorhus.com', {app: 'firefox'});
-
-            // Specify app arguments.
-            //  await open('https://sindresorhus.com', {app: ['google chrome', '--incognito']});
-          };
-          displayPDF();
-        });
-      });
-
-      //stream.on('finish', function() {
-      // get a blob you can do whatever you like with
-      //  const blob = stream.toBlob('application/pdf');
-
-      // or get a blob URL for display in the browser
-      //  const url = stream.toBlobURL('application/pdf');
-      //iframe.src = url;
-      //});
-      // open the PDF
-
-      //              doc.output( function(pdf) {
-      //                res.type('application/pdf');
-      //              res.end(pdf, 'binary');
-      //        });
-      //      app.get('profile.pdf', function (req, res) {
-      //        var doc = new Pdf();
-      //    doc.text("Hello World", 50, 50);
-
-      //      doc.output( function(pdf) {
-      //        res.type('application/pdf');
-      //      res.end(pdf, 'binary');
-      //});
-      //              });
-    });
-    //        console.log(`Saved ${repoNames.length} repos`);
-  });
+          // call async function
+          displayPDF(usernamePDF);
+        }); // end of writeStream.on("finish")
+      }); // end of axios call to queryUrlRepositories
+    }); // end of queryUrlOwner
+  }); // end of inquirer then block
