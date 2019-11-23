@@ -33,6 +33,7 @@ const complimentaryColors = {
   pink: "#ffccff" // light pink with pink
 };
 
+// complimentary border colors for around profile picture
 const borderColors = {
   blue: "#000080", // dark blue
   red: "#660000", // dark red
@@ -102,16 +103,19 @@ inquirer
         return; // end program
       }
 
+      // get needed data from the response.
       const name = responseOwner.data.name;
       const profileImageUrl = responseOwner.data.avatar_url; // use image with error message if no profile image found.
-      const location = responseOwner.data.location; // use boolean to change text (easier with link processing)
+      let location = responseOwner.data.location; // may change if none found
       let bio = responseOwner.data.bio; // may change if none found
       const blogUrl = responseOwner.data.blog; // use boolean to change text (easier with link processing)
+      let blogText = "Blog"; // may change if none found
       const numRepos = responseOwner.data.public_repos;
       const followers = responseOwner.data.followers;
       const numFollowing = responseOwner.data.following;
       let company = responseOwner.data.company; // may change if none found
 
+      // error checking - if some items not found...
       // default text if no bio
       if (bio === null || bio == "") {
         bio = "No bio entered.";
@@ -128,6 +132,7 @@ inquirer
       let locationExists;
       if (location === null || location == "") {
         locationExists = false; // use this to determine whether to create a link or not
+        location = "No location found.";
       } else {
         locationExists = true; // use this to determine whether to create a link or not
       }
@@ -136,6 +141,7 @@ inquirer
       let blogExists; // use this to determine whether to create a link or not
       if (blogUrl === null || blogUrl == "") {
         blogExists = false; // use this to determine whether to create a link or not
+        blogText = "No blog found.";
       } else {
         blogExists = true;
       }
@@ -170,8 +176,55 @@ inquirer
           return repository.stargazers_count;
         });
 
-        // create the PDF file
+        // determine where things should go on line with location, github and blog links
+        const charFactor = 5; // ~ points / character
+        const iconWidth = 8; // space for icon
+        const linkSpace = charFactor * 5; // ~5 spaces between links
+        const iconSpace = charFactor; // 1 space after the icons
+        const pageWidth = 611; // how wide the PDF page is
 
+        // length of all text on line is sum of:
+        //       location text, "github" (6), blog text;
+        //       3 * iconWidth for each of the 3 icons;
+        //       2 * linkSpace for space between each link;
+        //       3 * iconSpace after each icon
+        // ...all * charFactor
+        const locationTextLength = location.length * charFactor;
+        const githubTextLength = 6 * charFactor; // 6 characters in "Github"
+        const blogTextLength = blogText.length * charFactor;
+        const lineLength =
+          locationTextLength +
+          githubTextLength +
+          blogTextLength +
+          3 * iconWidth +
+          2 * linkSpace +
+          3 * iconSpace;
+
+        // location start:  start where whole line will be centered
+        // calc location start (icon & text) & length of link
+        const locationIconStart = pageWidth / 2 - lineLength / 2; // to center entire line
+        const locationTextStart = locationIconStart + iconWidth + iconSpace;
+        const locationLinkLength = iconWidth + iconSpace + locationTextLength;
+
+        // github start:  add location width & linkSpace to locationTextStart
+        const githubIconStart =
+          locationTextStart +
+          locationTextLength +
+          linkSpace;
+        // github text starts the icon width and icon spacer after the github icon
+        const githubTextStart = githubIconStart + iconWidth + iconSpace;
+        const githubLinkLength = iconWidth + iconSpace + githubTextLength;
+
+        // blog icon start:  add github width & linkSpace to githubTextStart
+        const blogIconStart =
+          githubTextStart +
+          githubTextLength +
+          linkSpace;
+        // blog text starts the icon width and icon spacer after the github icon
+        const blogTextStart = blogIconStart + iconWidth + iconSpace;
+        const blogLinkLength = iconWidth + iconSpace + blogTextLength;
+
+        // create the PDF file
         const doc = new PDFDocument();
 
         // pipe the document to username.pdf.  It will get overwritten if it already exists.
@@ -253,10 +306,11 @@ inquirer
 
         // link to location, if it exists w/ leading icon
         doc.moveDown();
+
         if (locationExists) {
           // location icon first
-          doc.image(locationIcon, 205, 205, {
-            fit: [8, 8], // same as fonstSize
+          doc.image(locationIcon, locationIconStart, 205, {
+            fit: [iconWidth, 8], // same as fonstSize
             continue: true // don't go to next line
           }); // end of icon block
           // then location text and link
@@ -264,14 +318,14 @@ inquirer
             .save()
             .fontSize(8)
             .link(
+              locationIconStart,
               205,
-              205,
-              40,
+              locationLinkLength,
               8,
               `https://www.google.com/maps/place/${location.replace(/ /g, "+")}`
             )
-            .text(location, 215, 205, {
-              width: 201,
+            .text(location, locationTextStart, 205, {
+              width: locationTextLength,
               align: "left",
               continue: true
             });
@@ -280,52 +334,61 @@ inquirer
         else {
           doc
             .save()
-            .fontSize(8)
-            .text("No location listed.", 215, 205, {
+            //  .fontSize(8)
+            .text(location, locationIconStart, 205, {
+              // location was changed to error message.
               align: "left",
-              width: 201,
+              width: locationTextLength,
               continue: true
             });
         }
 
         // link to github profile with icon
         // github icon first
-        doc.image(githubIcon, 290, 205, {
-          fit: [8, 8], // same as fontSize
+        
+        doc.image(githubIcon, githubIconStart, 205, {
+          fit: [iconWidth, 8], // same as fontSize
           continue: true // don't go to next line yet
         }); // end of icon block
+
         doc
           .save()
-          .link(290, 205, 40, 8, githubProfileUrl) // link starts where icon is & goes for 20
-          .text("GitHub", 300, 205, {
+          .link(githubIconStart, 205, githubLinkLength, 8, githubProfileUrl) // link starts where icon is & goes for 20
+          .text("GitHub", githubTextStart, 205, {
             align: "left",
-            width: 30,
+            width: githubTextLength,
             link: githubProfileUrl,
             continue: true // don't go to next line yet
           });
 
         // link to blog
+       
         if (blogExists) {
           // blog icon first
-          doc.image(blogIcon, 376, 205, {
-            fit: [8, 8], // same as fonstSize
-            //width: 8,
-            //align: "right",
+          doc.image(blogIcon, blogIconStart, 205, {
+            fit: [iconWidth, 8], // same as fonstSize
             continue: true // don't go to next line yet
           }); // end of icon block
           doc
             .save()
-            .link(366, 205, 40, 8)
-            .text("Blog", 366, 205, {
-              align: "right",
-              width: 40,
+            .link(
+              blogIconStart,
+              205,
+              blogLinkLength,
+              8
+            )
+            .text(blogText, blogTextStart, 205, {
+              align: "left",
+              width: blogTextLength,
               link: blogUrl
             });
         } else {
-          doc.save().text("No blog found.", 215, 205, {
-            align: "right",
-            width: 181
-          });
+          doc
+            .save()
+            .text(blogText, blogIconStart, 205, {
+              align: "left",
+              width: blogTextLength
+            });
         }
 
         // bio
@@ -411,7 +474,7 @@ inquirer
           async function displayPDF(pdfFile) {
             // Opens the image in the default image viewer and waits for the opened app to quit.
             await open(pdfFile, { wait: true });
-            return;  // end program
+            return; // end program
           }
 
           // call async function
