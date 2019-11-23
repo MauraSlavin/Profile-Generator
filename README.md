@@ -1,7 +1,7 @@
 # Profile-Generator
 https://mauraslavin.github.io/Profile-Generator/
   
-##Creates a developer profile PDF file based on a given person's Github page.
+## Creates a developer profile PDF file based on a given person's Github page.
 
 The user is prompted for a github user name and color.  
 A PDF file is created and opened with information from the appropriate github user's profile, with the color scheme chosen.  The PDF file is saved with the username as the filename (and .pdf as the extension).
