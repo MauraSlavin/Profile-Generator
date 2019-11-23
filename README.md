@@ -19,7 +19,7 @@ The following information is included:
 -   Number GitHub follower
 -   Number of developers following on GitHub
 
-[Hover here to see an example of a PDF created](./Assets/images/example.png)
+[Click here to see an example of a PDF created](./Assets/Images/example.png)
 
 Errors checked for include:
 - No github page found (a CMD line error message is returned with no PDF created)
