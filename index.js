@@ -15,7 +15,7 @@ const open = require("open");
 const colors = {
   blue: "#0066ff",
   red: "#bf0404",
-  yellow: "#ffff99", // pale yellow
+  yellow: "#ffff00", 
   orange: "#ff6600",
   purple: "#9900cc",
   green: "#009933",
@@ -26,7 +26,7 @@ const colors = {
 const complimentaryColors = {
   blue: "#accbfa", // light blue with blue
   red: "#ff9191", // light red with red
-  yellow: "#ffff00", // bright yello with pale yellow
+  yellow: "#d1fffd", // pale blue with yellow
   orange: "#ffae78", // light orange with orange
   purple: "#ffb3ff", // pink with purple
   green: "#b3ffcc", // light green with green
@@ -79,15 +79,15 @@ inquirer
     if (favColor === "yellow") {
       // if the color is yellow, use dark grey font color so it can be seen
       textColor = "#696463"; // dark grey
-      locationIcon = "locationIconGrey.png";
-      githubIcon = "githubIconGrey.png";
-      blogIcon = "blogIconGrey.png";
+      locationIcon = "./Assets/images/locationIconGrey.png";
+      githubIcon = "./Assets/images/githubIconGrey.png";
+      blogIcon = "./Assets/images/blogIconGrey.png";
     } else {
       // white is good on any other color choice.
       textColor = "#ffffff"; // white
-      locationIcon = "locationIconWhite.png";
-      githubIcon = "githubIconWhite.png";
-      blogIcon = "blogIconWhite.png";
+      locationIcon = "./Assets/images/locationIconWhite.png";
+      githubIcon = "./Assets/images/githubIconWhite.png";
+      blogIcon = "./Assets/images/blogIconWhite.png";
     }
 
     //  can now query Github...for user's profile information
@@ -148,15 +148,15 @@ inquirer
 
       // Download actual profile image, save to file called profile.jpg.
       // It will be overwritten if it already exists
-      const imageJpg = "profile.jpg"; // copies profile image to this file if it exists
+      const imageJpg = "./Assets/images/profile.jpg"; // copies profile image to this file if it exists
       async function streamProfileImage(profileImageUrl) {
         try {
           response = await request(profileImageUrl).pipe(
-            fs.createWriteStream("profile.jpg")
+            fs.createWriteStream("./Assets/images/profile.jpg")
           );
           // end of try
         } catch (err) {
-          imageJpg = "noProfileImage.jpg"; // image with "No Profile Image Found" in it; used if profile image not found.
+          imageJpg = "./Assets/images/noProfileImage.jpg"; // image with "No Profile Image Found" in it; used if profile image not found.
         } // end of catch
       } // end of asynch block
 
@@ -228,11 +228,11 @@ inquirer
         const doc = new PDFDocument();
 
         // pipe the document to username.pdf.  It will get overwritten if it already exists.
-        const usernamePDF = username + ".pdf";
+        const usernamePDF = `./Assets/Profiles/${username}.pdf`;
         let writeStream = doc.pipe(fs.createWriteStream(usernamePDF));
 
         // draw the background rectangles in complimentary color
-        // pdf file is 611 x 761
+        // pdf file is 611 wide x 761 long
         doc // at the top
           .save()
           .rect(0, 0, 611, 204)
