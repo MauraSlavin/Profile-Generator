@@ -21,6 +21,8 @@ The following information is included:
 
 [Click here to see an example of a PDF created](./Assets/Images/example.png)
 
+[Click here to see a short GIF demonstration](.Assets/../Assets/Images/demonstration.gif)
+
 Errors checked for include:
 - No github page found (a CMD line error message is returned with no PDF created)
 - No profile picture found ("No Profile Picture Found") where the image would have been
